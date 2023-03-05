@@ -6,3 +6,7 @@
 *.doc
 *.in
 *.out
+*.log
+*.aux
+*.synctex.gz
+*.toc
