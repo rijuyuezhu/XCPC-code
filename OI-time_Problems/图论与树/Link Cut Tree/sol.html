@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>&#x52A8;&#x6001;&#x6811;&#x95EE;&#x9898;&#xFF0C;Link Cut Tree &#x5B66;&#x4E60;&#x7B14;&#x8BB0;</title>
+        <style>
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css" integrity="sha384-yFRtMMDnQtDRO8rLpMIKrtPCD5jdktao2TV19YiZYWMDkUR5GQZR/NOVTdquEx1j" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 18px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="动态树问题link-cut-tree-学习笔记">动态树问题，Link Cut Tree 学习笔记</h1>
+<p>@[toc]</p>
+<h2 id="前言">前言</h2>
+<p>我的学习资料：</p>
+<p><a href="https://www.cnblogs.com/flashhu/p/8324551.html">FlashHu的博客1</a></p>
+<p><a href="https://www.cnblogs.com/flashhu/p/9498517.html">FlashHu的博客2</a></p>
+<p><a href="https://oi-wiki.org/ds/lct/">oi-wiki——Link Cut Tree</a></p>
+<p>这几篇博客都很经典。</p>
+<h2 id="动态树问题">动态树问题</h2>
+<p>同样是维护树，动态树比树链剖分更加困难。它多了两种操作：Link（连边），Cut（断边）。动态树其实不是一种算法，而是一种思想，我们要维护一个动态的森林。</p>
+<p>OI中，我们常常用 LCT（Link-Cut Tree）来进行动态树维护。</p>
+<h2 id="模板题引入">模板题引入</h2>
+<p><a href="https://www.luogu.com.cn/problem/P3690">P3690 【模板】Link Cut Tree （动态树）</a></p>
+<blockquote>
+<p>维护一棵树，点有点权，进行下列操作：</p>
+<ol>
+<li>求路径点权异或和。</li>
+<li>Link（连边）</li>
+<li>Cut（断边）</li>
+<li>单点修改点权。</li>
+</ol>
+<p>保证任意时刻都是一棵树。</p>
+</blockquote>
+<p>这就是个经典的动态树问题。</p>
+<p>模板题，不会的同学请自行点击上述博客进行学习。下面给出我的模板（压行警告）。</p>
+<p>时间复杂度应为 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>m</mi><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(m\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">m</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>（<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi></mrow><annotation encoding="application/x-tex">m</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">m</span></span></span></span> 次操作，每次 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>log</mi><mo>⁡</mo><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>）</p>
+<pre><code class="language-cpp"><div><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;cstdio&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;cstring&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> <span class="hljs-built_in">std</span>;
+<span class="hljs-keyword">typedef</span> <span class="hljs-keyword">long</span> <span class="hljs-keyword">long</span> ll;
+<span class="hljs-keyword">char</span> In[<span class="hljs-number">1</span> &lt;&lt; <span class="hljs-number">20</span>], *ss = In, *tt = In;
+<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> getchar() (ss == tt &amp;&amp; (tt = (ss = In) + fread(In, 1, 1 &lt;&lt; 20, stdin), ss == tt) ? EOF : *ss++)</span>
+<span class="hljs-function">ll <span class="hljs-title">read</span><span class="hljs-params">()</span> </span>{
+	ll x = <span class="hljs-number">0</span>, f = <span class="hljs-number">1</span>; <span class="hljs-keyword">char</span> ch = getchar();
+	<span class="hljs-keyword">for</span>(; ch &lt; <span class="hljs-string">&#x27;0&#x27;</span> || ch &gt; <span class="hljs-string">&#x27;9&#x27;</span>; ch = getchar()) <span class="hljs-keyword">if</span>(ch == <span class="hljs-string">&#x27;-&#x27;</span>) f = <span class="hljs-number">-1</span>;
+	<span class="hljs-keyword">for</span>(; ch &gt;= <span class="hljs-string">&#x27;0&#x27;</span> &amp;&amp; ch &lt;= <span class="hljs-string">&#x27;9&#x27;</span>; ch = getchar()) x = x * <span class="hljs-number">10</span> + <span class="hljs-keyword">int</span>(ch - <span class="hljs-string">&#x27;0&#x27;</span>);
+	<span class="hljs-keyword">return</span> x * f;
+}
+<span class="hljs-keyword">const</span> <span class="hljs-keyword">int</span> MAXN = <span class="hljs-number">1e5</span> + <span class="hljs-number">5</span>;
+<span class="hljs-keyword">int</span> n, m, val[MAXN];
+<span class="hljs-keyword">namespace</span> LCT {
+	<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> ls ch[0]</span>
+	<span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> rs ch[1]</span>
+	<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Node</span> {</span><span class="hljs-keyword">int</span> ch[<span class="hljs-number">2</span>], fa, rev, sum;}e[MAXN];
+	<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">nrt</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{<span class="hljs-keyword">return</span> e[e[x].fa].ls == x || e[e[x].fa].rs == x;}
+	<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">idy</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{<span class="hljs-keyword">return</span> e[e[x].fa].rs == x;}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">upd</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{e[x].sum = e[e[x].ls].sum ^ e[e[x].rs].sum ^ val[x];}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">psdrev</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{<span class="hljs-keyword">if</span>(x) swap(e[x].ls, e[x].rs), e[x].rev ^= <span class="hljs-number">1</span>;}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">psd</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{<span class="hljs-keyword">if</span>(e[x].rev) e[x].rev = <span class="hljs-number">0</span>, psdrev(e[x].ls), psdrev(e[x].rs);}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">psdall</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{<span class="hljs-keyword">if</span>(nrt(x)) psdall(e[x].fa); psd(x);}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">rtt</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{
+		<span class="hljs-keyword">int</span> y = e[x].fa, z = e[y].fa, k = idy(x), s = e[x].ch[k^<span class="hljs-number">1</span>];
+		e[x].fa = z; <span class="hljs-keyword">if</span>(nrt(y)) e[z].ch[idy(y)] = x;
+		e[y].fa = x; e[x].ch[k^<span class="hljs-number">1</span>] = y;
+		e[s].fa = y; e[y].ch[k] = s;
+		upd(y); upd(x);
+	}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">splay</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{
+		psdall(x);
+		<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> y = e[x].fa; nrt(x); rtt(x), y = e[x].fa)
+			<span class="hljs-keyword">if</span>(nrt(y)) rtt(idy(x) == idy(y) ? y : x);
+	}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">access</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> y = <span class="hljs-number">0</span>; x; y = x, x = e[x].fa) splay(x), e[x].rs = y, upd(x);}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">mkrt</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{access(x); splay(x); psdrev(x);}
+	<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">getrt</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x)</span> </span>{access(x); splay(x); <span class="hljs-keyword">while</span>(e[x].ls) psd(x = e[x].ls); splay(x); <span class="hljs-keyword">return</span> x;}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">split</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y)</span> </span>{mkrt(x); access(y); splay(y);}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">link</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y)</span> </span>{mkrt(x); <span class="hljs-keyword">if</span>(getrt(y) != x) e[x].fa = y;}
+	<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">cut</span><span class="hljs-params">(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y)</span> </span>{mkrt(x); <span class="hljs-keyword">if</span>(getrt(y) == x &amp;&amp; e[y].fa == x &amp;&amp; e[y].ls == <span class="hljs-number">0</span>) e[x].rs = e[y].fa = <span class="hljs-number">0</span>, upd(x);}
+}
+<span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> LCT;
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+	n = read(); m = read();
+	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt;= n; i++) val[i] = read();
+	<span class="hljs-keyword">for</span>(<span class="hljs-keyword">int</span> i = <span class="hljs-number">1</span>; i &lt;= m; i++) {
+		<span class="hljs-keyword">int</span> opt = read(), x = read(), y = read();
+		<span class="hljs-keyword">if</span>(opt == <span class="hljs-number">0</span>) {split(x, y); <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;%d\n&quot;</span>, e[y].sum);}
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opt == <span class="hljs-number">1</span>) link(x, y);
+		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span>(opt == <span class="hljs-number">2</span>) cut(x, y);
+		<span class="hljs-keyword">else</span> {
+			splay(x); val[x] = y; upd(x);
+		}
+	}
+	<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;
+}
+</div></code></pre>
+<h2 id="lct应用--技巧">LCT应用 &amp; 技巧</h2>
+<p>接下来的题目基本选了FlashHu的博客的题目（FlashHu yyds）。</p>
+<h3 id="类型1维护路径信息">类型1：维护路径信息</h3>
+<p>如果没有 Link 和 Cut 操作，那么其实可以用树链剖分来完成。尽管 树链剖分一般是 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><msup><mo><mi>log</mi><mo>⁡</mo></mo><mn>2</mn></msup><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n\log^2 n)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.148448em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8984479999999999em;"><span style="top:-3.1473400000000002em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">n</span><span class="mclose">)</span></span></span></span>，比 LCT 多了个 <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>log</mi><mo>⁡</mo></mrow><annotation encoding="application/x-tex">\log</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span></span></span></span>，但是一般来说常数上树剖完虐 LCT。</p>
+<p>只要 <code>split</code>，再在 Splay 上进行操作即可，转化为Splay的查询和修改操作。</p>
+<p>典型例题有</p>
+<p><a href="https://www.luogu.com.cn/problem/P3203">P3203 [HNOI2010]弹飞绵羊</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1501">P1501 [国家集训队]Tree II</a></p>
+<h3 id="类型2维护连通性与边双">类型2：维护连通性与边双</h3>
+<ol>
+<li>
+<p>动态树上维护连通性相当简单，用 <code>getrt</code> 操作得到两个树的根进行比对即可。或者还有种写法，先<code>mkrt</code> 一个点，再判断另一个点 <code>getrt</code> 后是不是这个点。</p>
+</li>
+<li>
+<p>维护边双：LCT可以结合并查集维护边双缩点树的动态加边和查询。这是很好用的操作。</p>
+</li>
+</ol>
+<p>典型例题有</p>
+<p><a href="https://www.luogu.com.cn/problem/P3950">P3950 部落冲突</a> （连通性）</p>
+<p><a href="https://www.luogu.com.cn/problem/P2542">P2542 航线规划</a> （边双）<a href="https://blog.csdn.net/qq_41996523/article/details/113130182">我的题解</a></p>
+<h3 id="类型3维护边权">类型3：维护边权</h3>
+<p>众所周知，树剖上维护边权的话，由于树剖的 <strong>父子关系确定</strong>，通常可以方便地用儿子节点的点权来代替边权。但是在LCT上，<strong>父子关系不确定</strong>，这种方法就失去其用武之地了。</p>
+<p>我们一般用 <strong>边化点</strong> 的办法来解决。把每条边也变成LCT上的节点，这样就可以正常操作了。只不过连边、断边要操作2次。具体的用途很多，常见的是动态维护最小（大）生成树。</p>
+<p>典型例题有</p>
+<p><a href="https://www.luogu.com.cn/problem/P4172">P4172 [WC2006]水管局长</a> （动态维护最小生成树）</p>
+<p><a href="https://www.luogu.com.cn/problem/P2387">P2387 [NOI2014] 魔法森林</a> （同上）</p>
+<p><a href="https://www.luogu.com.cn/problem/P4234">P4234 最小差值生成树</a></p>
+
+    </body>
+    </html>
