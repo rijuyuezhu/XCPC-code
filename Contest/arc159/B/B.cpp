@@ -1,26 +1,39 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-using ll = long long;
 using namespace std;
+using ll = long long;
+constexpr ll INF = 1e18;
 
-ll A, B;
-vector<ll> factor, factor2;
 
-void divide(ll v)
+ll A, B, ans;
+vector<ll> pr;
+
+
+ll gcd(ll a, ll b) 
 {
-	for (int i = 1; 1ll * i * i <= v; i++) {
-		if (v % i == 0) {
-			factor.push_back(i);
-			if (i != v / i)
-				factor2.push_back(v / i);
-		}
-	}
-	for (int i = (int)factor2.size() - 1; i >= 0; i--)
-		factor.push_back(factor2[i]);
+	return !b ? a : gcd(b, a % b);
+}
+void simplify()
+{
+	ll g = gcd(A, B);
+	A /= g;
+	B /= g;
 }
 
-int main()
+void divide(ll x)
+{
+	for (int i = 2; 1ll * i * i <= x; i++)
+		if (x % i == 0) {
+			pr.push_back(i);
+			while (x % i == 0)
+				x /= i;
+		}
+	if(x > 1)
+		pr.push_back(x);
+}
+
+int main() 
 {
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
@@ -29,20 +42,22 @@ int main()
 		cout << 1 << '\n';
 		return 0;
 	}
-
-	if (A < B) {
+	if (A < B)
 		swap(A, B);
-	}
+	simplify();
 	divide(A - B);
-	ll ret = B, ans = 0;
-	for (int i = (int)factor.size()-1; i >= 0; i--) {
-		ll v = factor[i];
-		ans += ret / v;
-		ret %= v;
+	cerr << A << ' ' << B << '\n';
+	while (B > 0) {
+		ll mn = B;
+		for (ll p : pr)
+			if ((A - B) % p == 0)
+				mn = min(mn, B % p);
+		ans += mn;
+		A -= mn, B -= mn;
+		simplify();
+		cerr << A << ' ' << B << '\n';
 	}
 	cout << ans << '\n';
-	
 
-	
 	return 0;
 }
