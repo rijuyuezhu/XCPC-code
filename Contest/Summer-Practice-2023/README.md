@@ -1,1 +1,1 @@
-Wenrui Huang's summer practice 2023 repo.
+The summer practice 2023 repo.
